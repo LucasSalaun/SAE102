@@ -24,29 +24,19 @@ int main(){
     t_plateau plateau;
     int nb_deplacement = 0;
     printf("Entrez le nom du fichier (.sok) : ");
-    scanf("%19s", partie);
-    getchar();
+
+    scanf("%s", partie);
     charger_partie(plateau, partie);
     afficher_entete(partie, nb_deplacement);
     afficher_plateau(plateau);
     char touche = '\0';
     bool gagner = false;
-    bool abandon = false;
-    while (gagner == false && abandon== false){
+    while (gagner == false){
         touche = '\0';
         if (kbhit()){
             touche = getchar();
         }
-        if (touche == 'x'){
-            abandon = true;
-        } 
-        else if (touche == 'r'){
-            charger_partie(plateau, partie);
-            nb_deplacement = 0;
-            afficher_entete(partie, nb_deplacement);
-            afficher_plateau(plateau);
-        } 
-        else if (touche == 'q' || touche == 'z' ||  touche == 's' || touche == 'd'){
+        if (touche == 'q' || touche == 'z' ||  touche == 's' || touche == 'd'){
             int ligne, colonne;
             trouver_sokoban(plateau, &ligne, &colonne);
             deplacer(plateau, touche, ligne, colonne, &nb_deplacement);
@@ -59,21 +49,7 @@ int main(){
         printf("Bravo, partie terminée.");
         printf("Déplacements effectués : %d\n", nb_deplacement);
     } 
-    else if (abandon == true){
-        printf("Vous avez choisis d'abandonner. \n");
-        char choix;
-        printf("Voulez-vous auvegarder la partie ? (o/n) : ");
-        scanf(" %c", &choix);
-        if (choix == 'o'){
-            char nom_fichier[20];
-            printf("Nom du fichier (.sok)");
-            scanf("%19s", nom_fichier);
-            enregistrer_partie(plateau, nom_fichier);
-            printf("Partie sauvegardée !\n");
-        }
-    }
-    
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement){
@@ -137,8 +113,7 @@ void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sok
     }
 }
 
-bool gagne(t_plateau plateau)
-{
+bool gagne(t_plateau plateau){
     for (int i = 0; i < TAILLE; i++)
     {
         for (int j = 0; j < TAILLE; j++)
@@ -169,8 +144,6 @@ void afficher_entete(char partie[20], int nb_deplacement){
     system("clear");
     printf("-------------------------------------------------------\n");
     printf("Partie : %s \n", partie);
-    printf("Touches : q (gauche), z (haut), s (bas), d (droite)\n");
-    printf("          x (abandonner), r (recommencer)\n");
     printf("Déplacements : %d\n", nb_deplacement);
     printf("-------------------------------------------------------\n");
 }
