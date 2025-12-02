@@ -137,16 +137,21 @@ void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sok
     }
 }
 
-bool gagne(t_plateau plateau){
-    for (int i = 0; i < TAILLE; i++){
-        for (int j = 0; j < TAILLE; j++){
-            if (plateau[i][j] == '.'){ //on cherche des caisses pas sur un point pour savoir si il faut continuer 
+bool gagne(t_plateau plateau)
+{
+    for (int i = 0; i < TAILLE; i++)
+    {
+        for (int j = 0; j < TAILLE; j++)
+        {
+            if (plateau[i][j] == '.')
                 return false;
-            }
+            if (plateau[i][j] == '+')
+                return false;
         }
     }
     return true;
 }
+
 
 void trouver_sokoban(t_plateau plateau, int *ligne, int *colonne){
     for (int i = 0; i < TAILLE; i++){
