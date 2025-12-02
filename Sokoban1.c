@@ -23,7 +23,7 @@ int main(){
     char partie[20];
     t_plateau plateau;
     int nb_deplacement = 0;
-    printf("Entrez le nom du fichier (.sok)");
+    printf("Entrez le nom du fichier (.sok) : ");
     scanf("%19s", partie);
     getchar();
     charger_partie(plateau, partie);
@@ -44,6 +44,7 @@ int main(){
             charger_partie(plateau, partie);
             nb_deplacement = 0;
             afficher_entete(partie, nb_deplacement);
+            afficher_plateau(plateau);
         } 
         else if (touche == 'q' || touche == 'z' ||  touche == 's' || touche == 'd'){
             int ligne, colonne;
@@ -139,7 +140,7 @@ void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sok
 bool gagne(t_plateau plateau){
     for (int i = 0; i < TAILLE; i++){
         for (int j = 0; j < TAILLE; j++){
-            if (plateau[i][j] == '$'){ //on cherche des caisses pas sur un point pour savoir si il faut continuer 
+            if (plateau[i][j] == '.'){ //on cherche des caisses pas sur un point pour savoir si il faut continuer 
                 return false;
             }
         }
