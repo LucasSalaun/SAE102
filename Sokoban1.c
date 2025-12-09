@@ -61,13 +61,13 @@ int main(){
 
 void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement){
     int bouge_en_ligne = 0, bouge_en_colonne = 0;
-    if (touche == 'q') {
+    if (touche == 'b' || touche == 'B') {
         bouge_en_colonne = -1;
-    }else if (touche == 'd'){
+    }else if (touche == 'd' || touche == 'D'){
         bouge_en_colonne = 1;
-    }else if (touche == 'z'){
+    }else if (touche == 'h' || touche == 'H'){
         bouge_en_ligne = -1;
-    }else if (touche == 's') {
+    }else if (touche == 'b' || touche == 'B') {
     bouge_en_ligne = 1;
     }else{
         return; //retourne rien si une mauvaise touche est appuyé
