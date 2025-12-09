@@ -10,7 +10,7 @@
 #define NBDEP 500
 
 typedef int t_plateau[TAILLE][TAILLE];
-typedef char typeDeplacements[500];
+typedef char typeDeplacements[NBDEP];
 
 int kbhit();
 void charger_partie(t_plateau plateau, char fichier[]);
@@ -26,13 +26,14 @@ int main(){
     char partie[20];
     char deplacement[20];
     t_plateau plateau;
-    int nb_deplacement = 0;
+    typeDeplacements dep;
+    int nb_deplacement = 0, nbLettre = 0;
     printf("Entrez le nom du niveau (.sok) : ");
     scanf("%s", partie);
     printf("Entrez le nom du fichier de deplacement (.dep) : ");
     scanf("%s", deplacement);
-    chargerDeplacements()
     charger_partie(plateau, partie);
+    chargerDeplacements(dep,deplacement,nbLettre);
     afficher_entete(partie, nb_deplacement);
     afficher_plateau(plateau);
     char touche = '\0';
