@@ -18,6 +18,7 @@ void afficher_entete(char partie[20], int nb_deplacement);
 void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement);
 bool gagne(t_plateau plateau);
 void trouver_sokoban(t_plateau plateau, int *ligne, int *colonne);
+void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
 
 int main(){
     char partie[20];
@@ -216,3 +217,25 @@ void enregistrer_partie(t_plateau plateau, char fichier[]){
     fclose(f);
 }
 
+void chargerDeplacements(typeDeplacements t, char fichier[], int * nb){
+    FILE * f;
+    char dep;
+    *nb = 0;
+
+    f = fopen(fichier, "r");
+    if (f==NULL){
+        printf("FICHIER NON TROUVE\n");
+    } else {
+        fread(&dep, sizeof(char), 1, f);
+        if (feof(f)){
+            printf("FICHIER VIDE\n");
+        } else {
+            while (!feof(f)){
+                t[*nb] = dep;
+                (*nb)++;
+                fread(&dep, sizeof(char), 1, f);
+            }
+        }
+    }
+    fclose(f);
+}
