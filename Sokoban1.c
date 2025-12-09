@@ -33,35 +33,35 @@ int main(){
     printf("Entrez le nom du fichier de deplacement (.dep) : ");
     scanf("%s", deplacement);
     charger_partie(plateau, partie);
-    chargerDeplacements(dep,deplacement,nbLettre);
+    chargerDeplacements(dep,deplacement,&nbLettre);
     afficher_entete(partie, nb_deplacement);
     afficher_plateau(plateau);
     char touche = '\0';
     bool gagner = false;
-    while (gagner == false){
-        touche = '\0';
-        if (kbhit()){
-            touche = getchar();
-        }
-        if (touche == 'q' || touche == 'z' ||  touche == 's' || touche == 'd'){
-            int ligne, colonne;
-            trouver_sokoban(plateau, &ligne, &colonne);
-            deplacer(plateau, touche, ligne, colonne, &nb_deplacement);
-            afficher_entete(partie, nb_deplacement);
-            afficher_plateau(plateau);
-            gagner=gagne(plateau);
-        }
+    int i =0;
+    while ( nbLettre != i){
+        usleep(500000);
+        touche = dep[i];        
+        int ligne, colonne;
+        trouver_sokoban(plateau, &ligne, &colonne);
+        deplacer(plateau, touche, ligne, colonne, &nb_deplacement);
+        afficher_entete(partie, nb_deplacement);
+        afficher_plateau(plateau);
+        i++;
     }
+        gagner=gagne(plateau);
     if (gagner == true){
-        printf("Bravo, partie terminée.");
-        printf("Déplacements effectués : %d\n", nb_deplacement);
-    } 
+        printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.",deplacement,partie,nb_deplacement);
+    }
+    else{
+        printf("La suite de déplacements %s N’EST PAS une solution pour la partie %s.", deplacement,partie);
+    }
     return EXIT_SUCCESS;
 }
 
 void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement){
     int bouge_en_ligne = 0, bouge_en_colonne = 0;
-    if (touche == 'b' || touche == 'B') {
+    if (touche == 'g' || touche == 'G') {
         bouge_en_colonne = -1;
     }else if (touche == 'd' || touche == 'D'){
         bouge_en_colonne = 1;
