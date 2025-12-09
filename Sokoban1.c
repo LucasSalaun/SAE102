@@ -7,8 +7,10 @@
 #include<fcntl.h>
 
 #define TAILLE 12
+#define NBDEP 500
 
 typedef int t_plateau[TAILLE][TAILLE];
+typedef char typeDeplacements[500];
 
 int kbhit();
 void charger_partie(t_plateau plateau, char fichier[]);
@@ -22,11 +24,14 @@ void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
 
 int main(){
     char partie[20];
+    char deplacement[20];
     t_plateau plateau;
     int nb_deplacement = 0;
-    printf("Entrez le nom du fichier (.sok) : ");
-
+    printf("Entrez le nom du niveau (.sok) : ");
     scanf("%s", partie);
+    printf("Entrez le nom du fichier de deplacement (.dep) : ");
+    scanf("%s", deplacement);
+    chargerDeplacements()
     charger_partie(plateau, partie);
     afficher_entete(partie, nb_deplacement);
     afficher_plateau(plateau);
