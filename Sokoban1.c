@@ -71,7 +71,11 @@ void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sok
     bouge_en_ligne = 1;
     }else{
         return; //retourne rien si une mauvaise touche est appuyé
-    }    
+    }
+    int maj = -1;
+    if (touche == 'B' || touche == 'H' || touche == 'G' || touche == 'D'){
+        maj = 1;
+    }
     int nouvelle_ligne = ligne_sokoban + bouge_en_ligne;
     int nouvelle_colonne = colonne_sokoban + bouge_en_colonne;
     char destination = plateau[nouvelle_ligne][nouvelle_colonne]; //la case où on souhaite aller
@@ -79,21 +83,21 @@ void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sok
     if (destination == '#'){
         return;
     }
-    if (destination == ' ' || destination == '.'){
+    if ((destination == ' ' && maj != 1) || (destination == '.'  && maj != 1)){
         if (position_actuelle == '@'){
             plateau[ligne_sokoban][colonne_sokoban] = ' ';
         } else {
             plateau[ligne_sokoban][colonne_sokoban] = '.';
         }
         
-        if (destination == ' '){
+        if ((destination == ' ' && maj != 1)){
             plateau[nouvelle_ligne][nouvelle_colonne] = '@';
         } else {
             plateau[nouvelle_ligne][nouvelle_colonne] = '+';
         }
         (*nb_deplacement)++;
     }
-    else if (destination == '$' || destination == '*'){
+    else if ((destination == '$'  && maj == 1) || (destination == '*'  && maj == 1)){
         int ligne_apres = nouvelle_ligne + bouge_en_ligne;
         int colonne_apres = nouvelle_colonne + bouge_en_colonne;
         char case_apres = plateau[ligne_apres][colonne_apres];
