@@ -9,7 +9,7 @@
 #define TAILLE 12
 #define NBDEP 500
 
-typedef int typePlateau[TAILLE][TAILLE];
+typedef char typePlateau[TAILLE][TAILLE];
 typedef char typeDeplacements[NBDEP];
 
 int kbhit();
