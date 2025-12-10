@@ -52,10 +52,10 @@ int main(){
     }
         gagner=gagne(plateau);
     if (gagner == true){
-        printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.",deplacement,partie,nb_deplacement);
+        printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.\n",deplacement,partie,nb_deplacement);
     }
     else{
-        printf("La suite de déplacements %s N’EST PAS une solution pour la partie %s.", deplacement,partie);
+        printf("La suite de déplacements %s N’EST PAS une solution pour la partie %s.\n", deplacement,partie);
     }
     return EXIT_SUCCESS;
 }
