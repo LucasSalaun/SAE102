@@ -9,40 +9,41 @@
 #define TAILLE 12
 #define NBDEP 500
 
-typedef int t_plateau[TAILLE][TAILLE];
+typedef int typePlateau[TAILLE][TAILLE];
 typedef char typeDeplacements[NBDEP];
 
 int kbhit();
-void charger_partie(t_plateau plateau, char fichier[]);
-void enregistrer_partie(t_plateau plateau, char fichier[]);
-void afficher_plateau(t_plateau plateau);
+void chargerPartie(typePlateau plateau, char fichier[]);
+void enregistrer_partie(typePlateau plateau, char fichier[]);
+void afficher_plateau(typePlateau plateau);
 void afficher_entete(char partie[20], int nb_deplacement);
-void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement);
-bool gagne(t_plateau plateau);
-void trouver_sokoban(t_plateau plateau, int *ligne, int *colonne);
+void deplacer(typePlateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement);
+bool gagne(typePlateau plateau);
+void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
 
 int main(){
     char partie[20];
     char deplacement[20];
-    t_plateau plateau;
+    typePlateau plateau;
     typeDeplacements dep;
     int nb_deplacement = 0, nbLettre = 0;
     printf("Entrez le nom du niveau (.sok) : ");
     scanf("%s", partie);
     printf("Entrez le nom du fichier de deplacement (.dep) : ");
     scanf("%s", deplacement);
-    charger_partie(plateau, partie);
+    chargerPartie(plateau, partie);
     chargerDeplacements(dep,deplacement,&nbLettre);
     afficher_entete(partie, nb_deplacement);
     afficher_plateau(plateau);
     char touche = '\0';
     bool gagner = false;
     int i =0;
+    int ligne = 0, colonne = 0;
+    trouver_sokoban(plateau, &ligne, &colonne);
     while ( nbLettre != i){
-        usleep(500000);
+        usleep(200000);
         touche = dep[i];        
-        int ligne, colonne;
         trouver_sokoban(plateau, &ligne, &colonne);
         deplacer(plateau, touche, ligne, colonne, &nb_deplacement);
         afficher_entete(partie, nb_deplacement);
@@ -59,7 +60,7 @@ int main(){
     return EXIT_SUCCESS;
 }
 
-void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement){
+void deplacer(typePlateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement){
     int bouge_en_ligne = 0, bouge_en_colonne = 0;
     if (touche == 'g' || touche == 'G') {
         bouge_en_colonne = -1;
@@ -124,7 +125,7 @@ void deplacer(t_plateau plateau, char touche, int ligne_sokoban, int colonne_sok
     }
 }
 
-bool gagne(t_plateau plateau){
+bool gagne(typePlateau plateau){
     for (int i = 0; i < TAILLE; i++)
     {
         for (int j = 0; j < TAILLE; j++)
@@ -139,7 +140,7 @@ bool gagne(t_plateau plateau){
 }
 
 
-void trouver_sokoban(t_plateau plateau, int *ligne, int *colonne){
+void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne){
     for (int i = 0; i < TAILLE; i++){
         for (int j = 0; j < TAILLE; j++){
             if (plateau[i][j] == '@' || plateau[i][j] == '+'){
@@ -159,7 +160,7 @@ void afficher_entete(char partie[20], int nb_deplacement){
     printf("-------------------------------------------------------\n");
 }
 
-void afficher_plateau(t_plateau plateau){
+void afficher_plateau(typePlateau plateau){
     for (int i = 0; i < TAILLE; i++){
         for (int j = 0; j < TAILLE; j++){
             char c = plateau[i][j];
@@ -171,16 +172,17 @@ void afficher_plateau(t_plateau plateau){
     }
 }
 
-void charger_partie(t_plateau plateau, char fichier[]){
-    FILE *f;
+void chargerPartie(typePlateau plateau, char fichier[]){
+    FILE * f;
     char finDeLigne;
+
     f = fopen(fichier, "r");
-    if (f == NULL){
-        printf("ERREUR : Impossible d'ouvrir le fichier\n");
+    if (f==NULL){
+        printf("ERREUR SUR FICHIER");
         exit(EXIT_FAILURE);
     } else {
-        for (int ligne = 0; ligne < TAILLE; ligne++){
-            for (int colonne = 0; colonne < TAILLE; colonne++){
+        for (int ligne=0 ; ligne<TAILLE ; ligne++){
+            for (int colonne=0 ; colonne<TAILLE ; colonne++){
                 fread(&plateau[ligne][colonne], sizeof(char), 1, f);
             }
             fread(&finDeLigne, sizeof(char), 1, f);
@@ -214,7 +216,7 @@ int kbhit(){
     return unCaractere;
 }
 
-void enregistrer_partie(t_plateau plateau, char fichier[]){
+void enregistrer_partie(typePlateau plateau, char fichier[]){
     FILE * f;
     char finDeLigne = '\n';
     f = fopen(fichier, "w");
