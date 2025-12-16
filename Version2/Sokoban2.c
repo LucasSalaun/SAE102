@@ -16,8 +16,8 @@ int kbhit();
 void chargerPartie(typePlateau plateau, char fichier[]);
 void enregistrer_partie(typePlateau plateau, char fichier[]);
 void afficher_plateau(typePlateau plateau);
-void afficher_entete(char partie[20], int nb_deplacement);
-void deplacer(typePlateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement);
+void afficher_entete(char partie[20], int nbDeplacement);
+void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement);
 bool gagne(typePlateau plateau);
 void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
@@ -27,14 +27,14 @@ int main(){
     char deplacement[20];
     typePlateau plateau;
     typeDeplacements dep;
-    int nb_deplacement = 0, nbLettre = 0;
+    int nbDeplacement = 0, nbLettre = 0;
     printf("Entrez le nom du niveau (.sok) : ");
     scanf("%s", partie);
     printf("Entrez le nom du fichier de deplacement (.dep) : ");
     scanf("%s", deplacement);
     chargerPartie(plateau, partie);
     chargerDeplacements(dep,deplacement,&nbLettre);
-    afficher_entete(partie, nb_deplacement);
+    afficher_entete(partie, nbDeplacement);
     afficher_plateau(plateau);
     char touche = '\0';
     bool gagner = false;
@@ -45,14 +45,14 @@ int main(){
         usleep(200000);
         touche = dep[i];        
         trouver_sokoban(plateau, &ligne, &colonne);
-        deplacer(plateau, touche, ligne, colonne, &nb_deplacement);
-        afficher_entete(partie, nb_deplacement);
+        deplacer(plateau, touche, ligne, colonne, &nbDeplacement);
+        afficher_entete(partie, nbDeplacement);
         afficher_plateau(plateau);
         i++;
     }
         gagner=gagne(plateau);
     if (gagner == true){
-        printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.\n",deplacement,partie,nb_deplacement);
+        printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.\n",deplacement,partie,nbDeplacement);
     }
     else{
         printf("La suite de déplacements %s N’EST PAS une solution pour la partie %s.\n", deplacement,partie);
@@ -60,16 +60,16 @@ int main(){
     return EXIT_SUCCESS;
 }
 
-void deplacer(typePlateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement){
-    int bouge_en_ligne = 0, bouge_en_colonne = 0;
+void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement){
+    int bougeEnLigne = 0, bougeEnColonne = 0;
     if (touche == 'g' || touche == 'G') {
-        bouge_en_colonne = -1;
+        bougeEnColonne = -1;
     }else if (touche == 'd' || touche == 'D'){
-        bouge_en_colonne = 1;
+        bougeEnColonne = 1;
     }else if (touche == 'h' || touche == 'H'){
-        bouge_en_ligne = -1;
+        bougeEnLigne = -1;
     }else if (touche == 'b' || touche == 'B') {
-    bouge_en_ligne = 1;
+    bougeEnLigne = 1;
     }else{
         return; //retourne rien si une mauvaise touche est appuyé
     }
@@ -77,50 +77,50 @@ void deplacer(typePlateau plateau, char touche, int ligne_sokoban, int colonne_s
     if (touche == 'B' || touche == 'H' || touche == 'G' || touche == 'D'){
         maj = 1;
     }
-    int nouvelle_ligne = ligne_sokoban + bouge_en_ligne;
-    int nouvelle_colonne = colonne_sokoban + bouge_en_colonne;
-    char destination = plateau[nouvelle_ligne][nouvelle_colonne]; //la case où on souhaite aller
-    char position_actuelle = plateau[ligne_sokoban][colonne_sokoban]; //la case où on est
+    int nouvelleLigne = ligneSokoban + bougeEnLigne;
+    int nouvelleColonne = colonneSokoban + bougeEnColonne;
+    char destination = plateau[nouvelleLigne][nouvelleColonne]; //la case où on souhaite aller
+    char positionActuelle = plateau[ligneSokoban][colonneSokoban]; //la case où on est
     if (destination == '#'){
         return;
     }
     if ((destination == ' ' && maj != 1) || (destination == '.'  && maj != 1)){
-        if (position_actuelle == '@'){
-            plateau[ligne_sokoban][colonne_sokoban] = ' ';
+        if (positionActuelle == '@'){
+            plateau[ligneSokoban][colonneSokoban] = ' ';
         } else {
-            plateau[ligne_sokoban][colonne_sokoban] = '.';
+            plateau[ligneSokoban][colonneSokoban] = '.';
         }
         
         if ((destination == ' ' && maj != 1)){
-            plateau[nouvelle_ligne][nouvelle_colonne] = '@';
+            plateau[nouvelleLigne][nouvelleColonne] = '@';
         } else {
-            plateau[nouvelle_ligne][nouvelle_colonne] = '+';
+            plateau[nouvelleLigne][nouvelleColonne] = '+';
         }
-        (*nb_deplacement)++;
+        (*nbDeplacement)++;
     }
     else if ((destination == '$'  && maj == 1) || (destination == '*'  && maj == 1)){
-        int ligne_apres = nouvelle_ligne + bouge_en_ligne;
-        int colonne_apres = nouvelle_colonne + bouge_en_colonne;
-        char case_apres = plateau[ligne_apres][colonne_apres];
-        if (case_apres == ' ' || case_apres == '.'){
-            if (case_apres == ' '){
-                plateau[ligne_apres][colonne_apres] = '$';
+        int ligneApres = nouvelleLigne + bougeEnLigne;
+        int colonneApres = nouvelleColonne + bougeEnColonne;
+        char caseApres = plateau[ligneApres][colonneApres];
+        if (caseApres == ' ' || caseApres == '.'){
+            if (caseApres == ' '){
+                plateau[ligneApres][colonneApres] = '$';
             } else {
-                plateau[ligne_apres][colonne_apres] = '*';
+                plateau[ligneApres][colonneApres] = '*';
             }
             
             if (destination == '$'){
-                plateau[nouvelle_ligne][nouvelle_colonne] = '@';
+                plateau[nouvelleLigne][nouvelleColonne] = '@';
             } else {
-                plateau[nouvelle_ligne][nouvelle_colonne] = '+';
+                plateau[nouvelleLigne][nouvelleColonne] = '+';
             }
             
-            if (position_actuelle == '@'){
-                plateau[ligne_sokoban][colonne_sokoban] = ' ';
+            if (positionActuelle == '@'){
+                plateau[ligneSokoban][colonneSokoban] = ' ';
             } else {
-                plateau[ligne_sokoban][colonne_sokoban] = '.';
+                plateau[ligneSokoban][colonneSokoban] = '.';
             }
-            (*nb_deplacement)++;
+            (*nbDeplacement)++;
         }
     }
 }
@@ -152,11 +152,11 @@ void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne){
     }
 }
 
-void afficher_entete(char partie[20], int nb_deplacement){
+void afficher_entete(char partie[20], int nbDeplacement){
     system("clear");
     printf("-------------------------------------------------------\n");
     printf("Partie : %s \n", partie);
-    printf("Déplacements : %d\n", nb_deplacement);
+    printf("Déplacements : %d\n", nbDeplacement);
     printf("-------------------------------------------------------\n");
 }
 
