@@ -1,0 +1,253 @@
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
+#include<stdbool.h>
+#include<termios.h>
+#include<unistd.h>
+#include<fcntl.h>
+
+#define TAILLE 12
+#define NBDEP 500
+
+typedef char typePlateau[TAILLE][TAILLE];
+typedef char typeDeplacements[NBDEP];
+
+int kbhit();
+void chargerPartie(typePlateau plateau, char fichier[]);
+void enregistrer_partie(typePlateau plateau, char fichier[]);
+void afficher_plateau(typePlateau plateau);
+void afficher_entete(char partie[20], int nb_deplacement);
+void deplacer(typePlateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement);
+bool gagne(typePlateau plateau);
+void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne);
+void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
+
+int main(){
+    char partie[20];
+    char deplacement[20];
+    typePlateau plateau;
+    typeDeplacements dep;
+    int nb_deplacement = 0, nbLettre = 0;
+    printf("Entrez le nom du niveau (.sok) : ");
+    scanf("%s", partie);
+    printf("Entrez le nom du fichier de deplacement (.dep) : ");
+    scanf("%s", deplacement);
+    chargerPartie(plateau, partie);
+    chargerDeplacements(dep,deplacement,&nbLettre);
+    afficher_entete(partie, nb_deplacement);
+    afficher_plateau(plateau);
+    char touche = '\0';
+    bool gagner = false;
+    int i =0;
+    int ligne = 0, colonne = 0;
+    trouver_sokoban(plateau, &ligne, &colonne);
+    while ( nbLettre != i){
+        usleep(200000);
+        touche = dep[i];        
+        trouver_sokoban(plateau, &ligne, &colonne);
+        deplacer(plateau, touche, ligne, colonne, &nb_deplacement);
+        afficher_entete(partie, nb_deplacement);
+        afficher_plateau(plateau);
+        i++;
+    }
+        gagner=gagne(plateau);
+    if (gagner == true){
+        printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.\n",deplacement,partie,nb_deplacement);
+    }
+    else{
+        printf("La suite de déplacements %s N’EST PAS une solution pour la partie %s.\n", deplacement,partie);
+    }
+    return EXIT_SUCCESS;
+}
+
+void deplacer(typePlateau plateau, char touche, int ligne_sokoban, int colonne_sokoban, int *nb_deplacement){
+    int bouge_en_ligne = 0, bouge_en_colonne = 0;
+    if (touche == 'g' || touche == 'G') {
+        bouge_en_colonne = -1;
+    }else if (touche == 'd' || touche == 'D'){
+        bouge_en_colonne = 1;
+    }else if (touche == 'h' || touche == 'H'){
+        bouge_en_ligne = -1;
+    }else if (touche == 'b' || touche == 'B') {
+    bouge_en_ligne = 1;
+    }else{
+        return; //retourne rien si une mauvaise touche est appuyé
+    }
+    int maj = -1;
+    if (touche == 'B' || touche == 'H' || touche == 'G' || touche == 'D'){
+        maj = 1;
+    }
+    int nouvelle_ligne = ligne_sokoban + bouge_en_ligne;
+    int nouvelle_colonne = colonne_sokoban + bouge_en_colonne;
+    char destination = plateau[nouvelle_ligne][nouvelle_colonne]; //la case où on souhaite aller
+    char position_actuelle = plateau[ligne_sokoban][colonne_sokoban]; //la case où on est
+    if (destination == '#'){
+        return;
+    }
+    if ((destination == ' ' && maj != 1) || (destination == '.'  && maj != 1)){
+        if (position_actuelle == '@'){
+            plateau[ligne_sokoban][colonne_sokoban] = ' ';
+        } else {
+            plateau[ligne_sokoban][colonne_sokoban] = '.';
+        }
+        
+        if ((destination == ' ' && maj != 1)){
+            plateau[nouvelle_ligne][nouvelle_colonne] = '@';
+        } else {
+            plateau[nouvelle_ligne][nouvelle_colonne] = '+';
+        }
+        (*nb_deplacement)++;
+    }
+    else if ((destination == '$'  && maj == 1) || (destination == '*'  && maj == 1)){
+        int ligne_apres = nouvelle_ligne + bouge_en_ligne;
+        int colonne_apres = nouvelle_colonne + bouge_en_colonne;
+        char case_apres = plateau[ligne_apres][colonne_apres];
+        if (case_apres == ' ' || case_apres == '.'){
+            if (case_apres == ' '){
+                plateau[ligne_apres][colonne_apres] = '$';
+            } else {
+                plateau[ligne_apres][colonne_apres] = '*';
+            }
+            
+            if (destination == '$'){
+                plateau[nouvelle_ligne][nouvelle_colonne] = '@';
+            } else {
+                plateau[nouvelle_ligne][nouvelle_colonne] = '+';
+            }
+            
+            if (position_actuelle == '@'){
+                plateau[ligne_sokoban][colonne_sokoban] = ' ';
+            } else {
+                plateau[ligne_sokoban][colonne_sokoban] = '.';
+            }
+            (*nb_deplacement)++;
+        }
+    }
+}
+
+bool gagne(typePlateau plateau){
+    for (int i = 0; i < TAILLE; i++)
+    {
+        for (int j = 0; j < TAILLE; j++)
+        {
+            if (plateau[i][j] == '.')
+                return false;
+            if (plateau[i][j] == '+')
+                return false;
+        }
+    }
+    return true;
+}
+
+
+void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne){
+    for (int i = 0; i < TAILLE; i++){
+        for (int j = 0; j < TAILLE; j++){
+            if (plateau[i][j] == '@' || plateau[i][j] == '+'){
+                *ligne = i;
+                *colonne = j;
+                return;
+            }
+        }
+    }
+}
+
+void afficher_entete(char partie[20], int nb_deplacement){
+    system("clear");
+    printf("-------------------------------------------------------\n");
+    printf("Partie : %s \n", partie);
+    printf("Déplacements : %d\n", nb_deplacement);
+    printf("-------------------------------------------------------\n");
+}
+
+void afficher_plateau(typePlateau plateau){
+    for (int i = 0; i < TAILLE; i++){
+        for (int j = 0; j < TAILLE; j++){
+            char c = plateau[i][j];
+            if (c == '*') c = '$'; //on ne doit pas à l'affichage différencier les caisses des caisses sur objectif etc...
+            if (c == '+') c = '@';
+            printf("%c", c);
+        }
+        printf("\n");
+    }
+}
+
+void chargerPartie(typePlateau plateau, char fichier[]){
+    FILE * f;
+    char finDeLigne;
+
+    f = fopen(fichier, "r");
+    if (f==NULL){
+        printf("ERREUR SUR FICHIER");
+        exit(EXIT_FAILURE);
+    } else {
+        for (int ligne=0 ; ligne<TAILLE ; ligne++){
+            for (int colonne=0 ; colonne<TAILLE ; colonne++){
+                fread(&plateau[ligne][colonne], sizeof(char), 1, f);
+            }
+            fread(&finDeLigne, sizeof(char), 1, f);
+        }
+        fclose(f);
+    }
+}
+
+int kbhit(){
+    int unCaractere = 0;
+    struct termios oldt, newt;
+    int ch;
+    int oldf;
+    
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+ 
+    ch = getchar();
+    
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    fcntl(STDIN_FILENO, F_SETFL, oldf);
+ 
+    if (ch != EOF){
+        ungetc(ch, stdin);
+        unCaractere = 1;
+    } 
+    return unCaractere;
+}
+
+void enregistrer_partie(typePlateau plateau, char fichier[]){
+    FILE * f;
+    char finDeLigne = '\n';
+    f = fopen(fichier, "w");
+    for (int ligne =0; ligne < TAILLE; ligne++){
+        for (int colonne = 0; colonne < TAILLE; colonne++){
+            fwrite(&plateau[ligne][colonne], sizeof(char), 1, f);
+        }
+        fwrite(&finDeLigne, sizeof(char), 1, f);
+    }
+    fclose(f);
+}
+
+void chargerDeplacements(typeDeplacements t, char fichier[], int * nb){
+    FILE * f;
+    char dep;
+    *nb = 0;
+
+    f = fopen(fichier, "r");
+    if (f==NULL){
+        printf("FICHIER NON TROUVE\n");
+    } else {
+        fread(&dep, sizeof(char), 1, f);
+        if (feof(f)){
+            printf("FICHIER VIDE\n");
+        } else {
+            while (!feof(f)){
+                t[*nb] = dep;
+                (*nb)++;
+                fread(&dep, sizeof(char), 1, f);
+            }
+        }
+    }
+    fclose(f);
+}
