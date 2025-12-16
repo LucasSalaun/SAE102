@@ -17,17 +17,22 @@ void chargerPartie(typePlateau plateau, char fichier[]);
 void enregistrer_partie(typePlateau plateau, char fichier[]);
 void afficher_plateau(typePlateau plateau);
 void afficher_entete(char partie[20], int nbDeplacement);
-void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement);
+void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement, bool *inutile);
 bool gagne(typePlateau plateau);
 void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
+void pas_jouee(char dep[], int *i, bool *inutile, int * compteur);
+pas_jouee(dep[i],&ii, &inutile, &compteurOpti);
+
 
 int main(){
     char partie[20];
     char deplacement[20];
     typePlateau plateau;
     typeDeplacements dep;
+    typeDeplacements opti;
     int nbDeplacement = 0, nbLettre = 0;
+    bool inutile = false;
     printf("Entrez le nom du niveau (.sok) : ");
     scanf("%s", partie);
     printf("Entrez le nom du fichier de deplacement (.dep) : ");
@@ -40,12 +45,15 @@ int main(){
     bool gagner = false;
     int i =0;
     int ligne = 0, colonne = 0;
+    int ii = 0
+    int compteurOpti = 0;
     trouver_sokoban(plateau, &ligne, &colonne);
     while ( nbLettre != i){
         usleep(200000);
         touche = dep[i];        
         trouver_sokoban(plateau, &ligne, &colonne);
-        deplacer(plateau, touche, ligne, colonne, &nbDeplacement);
+        deplacer(plateau, touche, ligne, colonne, &nbDeplacement, &inutile);
+        pas_jouee(dep[i],&ii, &inutile, &compteurOpti);
         afficher_entete(partie, nbDeplacement);
         afficher_plateau(plateau);
         i++;
@@ -82,6 +90,7 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
     char destination = plateau[nouvelleLigne][nouvelleColonne]; //la case où on souhaite aller
     char positionActuelle = plateau[ligneSokoban][colonneSokoban]; //la case où on est
     if (destination == '#'){
+        inutile = true;
         return;
     }
     if ((destination == ' ' && maj != 1) || (destination == '.'  && maj != 1)){
@@ -122,6 +131,9 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
             }
             (*nbDeplacement)++;
         }
+    }
+    else{
+        inutile = true;
     }
 }
 
