@@ -137,9 +137,12 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
 }
 
 void pas_jouee(char dep[], bool *inutile, int * compteur, int i){
-    dep[i]='?';
-    *inutile = false;
-    *compteur++;
+    if (*inutile==true){
+        dep[i]='?';
+        *inutile = false;
+        *compteur++;
+    }
+    
 }
 
 bool gagne(typePlateau plateau){
