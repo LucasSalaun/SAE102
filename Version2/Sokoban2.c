@@ -21,8 +21,8 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
 bool gagne(typePlateau plateau);
 void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
-void pas_jouee(char dep[], bool *inutile, int * compteur, int i);
-
+void pas_jouee(char dep[], int *i, bool *inutile, int * compteur);
+pas_jouee(dep[i],&ii, &inutile, &compteurOpti);
 
 
 int main(){
@@ -45,6 +45,7 @@ int main(){
     bool gagner = false;
     int i =0;
     int ligne = 0, colonne = 0;
+    int ii = 0
     int compteurOpti = 0;
     trouver_sokoban(plateau, &ligne, &colonne);
     while ( nbLettre != i){
@@ -52,7 +53,7 @@ int main(){
         touche = dep[i];        
         trouver_sokoban(plateau, &ligne, &colonne);
         deplacer(plateau, touche, ligne, colonne, &nbDeplacement, &inutile);
-        pas_jouee(dep[i], &inutile, &compteurOpti ,i);
+        pas_jouee(dep[i],&ii, &inutile, &compteurOpti);
         afficher_entete(partie, nbDeplacement);
         afficher_plateau(plateau);
         i++;
@@ -67,7 +68,7 @@ int main(){
     return EXIT_SUCCESS;
 }
 
-void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement, bool *inutile){
+void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement){
     int bougeEnLigne = 0, bougeEnColonne = 0;
     if (touche == 'g' || touche == 'G') {
         bougeEnColonne = -1;
@@ -89,7 +90,7 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
     char destination = plateau[nouvelleLigne][nouvelleColonne]; //la case où on souhaite aller
     char positionActuelle = plateau[ligneSokoban][colonneSokoban]; //la case où on est
     if (destination == '#'){
-        inutile = true;
+        *inutile = true;
         return;
     }
     if ((destination == ' ' && maj != 1) || (destination == '.'  && maj != 1)){
@@ -132,7 +133,8 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
         }
     }
     else{
-        inutile = true;
+        *inutile = true;
+        return;
     }
 }
 
@@ -189,6 +191,15 @@ void afficher_plateau(typePlateau plateau){
             printf("%c", c);
         }
         printf("\n");
+    }
+}
+
+void pas_jouee(char dep[], int i, bool inutile, int * compteur){
+    if(inutile==true){
+        dep[i]="";
+    }
+    else{
+        (*compteur++);
     }
 }
 
