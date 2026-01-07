@@ -21,8 +21,8 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
 bool gagne(typePlateau plateau);
 void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
-void pas_jouee(char dep[], int *i, bool *inutile, int * compteur);
-pas_jouee(dep[i],&ii, &inutile, &compteurOpti);
+void pas_jouee(char dep[], bool *inutile, int * compteur, int i);
+
 
 
 int main(){
@@ -45,7 +45,6 @@ int main(){
     bool gagner = false;
     int i =0;
     int ligne = 0, colonne = 0;
-    int ii = 0
     int compteurOpti = 0;
     trouver_sokoban(plateau, &ligne, &colonne);
     while ( nbLettre != i){
@@ -53,7 +52,7 @@ int main(){
         touche = dep[i];        
         trouver_sokoban(plateau, &ligne, &colonne);
         deplacer(plateau, touche, ligne, colonne, &nbDeplacement, &inutile);
-        pas_jouee(dep[i],&ii, &inutile, &compteurOpti);
+        pas_jouee(dep[i], &inutile, &compteurOpti ,i);
         afficher_entete(partie, nbDeplacement);
         afficher_plateau(plateau);
         i++;
@@ -68,7 +67,7 @@ int main(){
     return EXIT_SUCCESS;
 }
 
-void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement){
+void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement, bool *inutile){
     int bougeEnLigne = 0, bougeEnColonne = 0;
     if (touche == 'g' || touche == 'G') {
         bougeEnColonne = -1;
@@ -135,6 +134,12 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
     else{
         inutile = true;
     }
+}
+
+void pas_jouee(char dep[], bool *inutile, int * compteur, int i){
+    dep[i]='?';
+    *inutile = false;
+    *compteur++;
 }
 
 bool gagne(typePlateau plateau){
