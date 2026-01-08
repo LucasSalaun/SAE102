@@ -138,8 +138,8 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
 
 void pas_jouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteur, int i){
     if (*inutile==false){
-        opti[compteurOpti]=dep[i]
-        *compteurOpti++;
+        opti[*compteur] = dep[i];
+        *compteur++;
     }
     else{
         *inutile = false;
