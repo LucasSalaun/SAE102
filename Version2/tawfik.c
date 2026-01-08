@@ -1,4 +1,4 @@
-#include<stdlib.h>
+#include<stdlib.h> //utiliser les coordonnées
 #include<stdio.h>
 #include<string.h>
 #include<stdbool.h>
