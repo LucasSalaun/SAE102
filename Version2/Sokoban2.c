@@ -21,7 +21,7 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
 bool gagne(typePlateau plateau);
 void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
-void pas_jouee(char dep[], int *i, bool *inutile, int * compteur);
+void pas_jouee(typeDeplacements dep,typeDeplacements opti, int *i, bool *inutile, int * compteur);
 pas_jouee(dep[i],&ii, &inutile, &compteurOpti);
 
 
@@ -53,7 +53,7 @@ int main(){
         touche = dep[i];        
         trouver_sokoban(plateau, &ligne, &colonne);
         deplacer(plateau, touche, ligne, colonne, &nbDeplacement, &inutile);
-        pas_jouee(dep[i],&ii, &inutile, &compteurOpti);
+        pas_jouee(dep[i],opti[],&ii, &inutile, &compteurOpti);
         afficher_entete(partie, nbDeplacement);
         afficher_plateau(plateau);
         i++;
@@ -61,6 +61,10 @@ int main(){
         gagner=gagne(plateau);
     if (gagner == true){
         printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.\n",deplacement,partie,nbDeplacement);
+        char fichier[30];
+        printf("Rentrer un nom de fichier(.dep)");
+        scanf("%s",fichier);
+        enregistrer_partie(typePlateau opti, char fichier[], int compteurOpti);
     }
     else{
         printf("La suite de déplacements %s N’EST PAS une solution pour la partie %s.\n", deplacement,partie);
@@ -138,11 +142,11 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
     }
 }
 
-void pas_jouee(char dep[], bool *inutile, int * compteur, int i){
-    if (*inutile==true){
-        dep[i]='?';
+void pas_jouee(char dep[],char opti[], ,bool *inutile, int * compteurOpti, int i){
+    if (*inutile==flase){
+        opti[*compteurOpti]=dep[];
         *inutile = false;
-        *compteur++;
+        *compteurOpti++;
     }
     
 }
@@ -247,15 +251,11 @@ int kbhit(){
     return unCaractere;
 }
 
-void enregistrer_partie(typePlateau plateau, char fichier[]){
+void enregistrer_partie(typeDeplacements opti, char fichier[], int compteurOpti){
     FILE * f;
-    char finDeLigne = '\n';
     f = fopen(fichier, "w");
-    for (int ligne =0; ligne < TAILLE; ligne++){
-        for (int colonne = 0; colonne < TAILLE; colonne++){
-            fwrite(&plateau[ligne][colonne], sizeof(char), 1, f);
-        }
-        fwrite(&finDeLigne, sizeof(char), 1, f);
+    for (int ligne =0; ligne < NBDEP; ligne++){
+        fwrite(&opti[ligne], sizeof(char), 1, f);
     }
     fclose(f);
 }
