@@ -21,7 +21,7 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
 bool gagne(typePlateau plateau);
 void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
-void pas_jouee(char dep[], bool *inutile, int * compteur, int i);
+void pas_jouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteur, int i);
 
 
 
@@ -52,7 +52,7 @@ int main(){
         touche = dep[i];        
         trouver_sokoban(plateau, &ligne, &colonne);
         deplacer(plateau, touche, ligne, colonne, &nbDeplacement, &inutile);
-        pas_jouee(dep[i], &inutile, &compteurOpti ,i);
+        pas_jouee(dep, opti, &inutile, &compteurOpti , i);
         afficher_entete(partie, nbDeplacement);
         afficher_plateau(plateau);
         i++;
@@ -89,7 +89,7 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
     char destination = plateau[nouvelleLigne][nouvelleColonne]; //la case où on souhaite aller
     char positionActuelle = plateau[ligneSokoban][colonneSokoban]; //la case où on est
     if (destination == '#'){
-        inutile = true;
+        *inutile = true;
         return;
     }
     if ((destination == ' ' && maj != 1) || (destination == '.'  && maj != 1)){
@@ -132,15 +132,17 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
         }
     }
     else{
-        inutile = true;
+        *inutile = true;
     }
 }
 
-void pas_jouee(char dep[], bool *inutile, int * compteur, int i){
-    if (*inutile==true){
-        dep[i]='?';
+void pas_jouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteur, int i){
+    if (*inutile==false){
+        opti[compteurOpti]=dep[i]
+        *compteurOpti++;
+    }
+    else{
         *inutile = false;
-        *compteur++;
     }
     
 }
