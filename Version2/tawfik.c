@@ -6,12 +6,12 @@
 #include<unistd.h>
 #include<fcntl.h>
 
-#define TAILLE 12
-#define NBDEP 500
-
+#define TAILLE 12 //Utilise pour definir la taille du tableau 
+#define NBDEP 500 //Utilise pour definir la taille du tableau de deplacement
+ 
 typedef char typePlateau[TAILLE][TAILLE];
 typedef char typeDeplacements[NBDEP];
-
+//prototypage 
 int kbhit();
 void chargerPartie(typePlateau plateau, char fichier[]);
 void enregistrerPartie(typeDeplacements opti, char fichier[], int compteurOpti);
@@ -173,22 +173,22 @@ void enregistrerPartie(typeDeplacements opti, char fichier[], int compteurOpti){
 bool gagne(typePlateau plateau){
     for (int i = 0; i < TAILLE; i++)
     {
-        for (int j = 0; j < TAILLE; j++)
+        for (int j = 0; j < TAILLE; j++)//on scan toutes les cases
         {
             if (plateau[i][j] == '.')
                 return false;
             if (plateau[i][j] == '+')
                 return false;
         }
-    }
+    }// si on n'a trouve aucune cible sans caisse, alors c'est que toutes les objectifs ont ete complete et que la partie est gagnee
     return true;
 }
 
 
 void trouverSokoban(typePlateau plateau, int *ligne, int *colonne){
     for (int i = 0; i < TAILLE; i++){
-        for (int j = 0; j < TAILLE; j++){
-            if (plateau[i][j] == '@' || plateau[i][j] == '+'){
+        for (int j = 0; j < TAILLE; j++){ //on scan toutes les cases
+            if (plateau[i][j] == '@' || plateau[i][j] == '+'){ //si Sokoban est sur cette case, met à jour ligne et colonne pour avoir sa position
                 *ligne = i;
                 *colonne = j;
                 return;
@@ -210,7 +210,7 @@ void afficherPlateau(typePlateau plateau){
         for (int j = 0; j < TAILLE; j++){
             char c = plateau[i][j];
             if (c == '*') c = '$'; //on ne doit pas à l'affichage différencier les caisses des caisses sur objectif etc...
-            if (c == '+') c = '@';
+            if (c == '+') c = '@';  
             printf("%c", c);
         }
         printf("\n");
