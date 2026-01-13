@@ -1,4 +1,4 @@
-#include<stdlib.h>
+#include<stdlib.h> //utiliser les coordonnées
 #include<stdio.h>
 #include<string.h>
 #include<stdbool.h>
@@ -14,14 +14,14 @@ typedef char typeDeplacements[NBDEP];
 
 int kbhit();
 void chargerPartie(typePlateau plateau, char fichier[]);
-void enregistrerPartie(typePlateau plateau, char fichier[]);
+void enregistrerPartie(typeDeplacements opti, char fichier[], int compteurOpti);
 void afficherPlateau(typePlateau plateau);
 void afficherEntete(char partie[20], int nbDeplacement);
 void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement, bool *inutile);
 bool gagne(typePlateau plateau);
 void trouverSokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
-void pasJouee(typeDeplacements dep,typeDeplacements opti, int *i, bool *inutile, int * compteur);
+void pasJouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteurOpti, int i);
 
 
 
@@ -45,26 +45,31 @@ int main(){
     bool gagner = false;
     int i =0;
     int ligne = 0, colonne = 0;
-    int ii = 0
     int compteurOpti = 0;
     trouverSokoban(plateau, &ligne, &colonne);
     while ( nbLettre != i){
-        usleep(200000);
+        usleep(20000);
         touche = dep[i];        
         trouverSokoban(plateau, &ligne, &colonne);
         deplacer(plateau, touche, ligne, colonne, &nbDeplacement, &inutile);
-        pasJouee(dep[i],opti[],&ii, &inutile, &compteurOpti);
+        pasJouee(dep, opti, &inutile, &compteurOpti , i);
         afficherEntete(partie, nbDeplacement);
         afficherPlateau(plateau);
         i++;
     }
         gagner=gagne(plateau);
     if (gagner == true){
-        printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.\n",deplacement,partie,nbDeplacement);
-        char fichier[30];
-        printf("Rentrer un nom de fichier(.dep)");
-        scanf("%s",fichier);
-        enregistrerPartie(typePlateau opti, char fichier[], int compteurOpti);
+        printf("La suite de déplacements %s est bien une solution pour la partie %s.\nElle contient initialement %d caractères.\n",deplacement,partie,nbLettre);
+        printf("Après optimisation elle contient %d caractères. Souhaitez-vous l’enregistrer (o/n) ?" ,compteurOpti);
+        char choix;
+        scanf(" %c", &choix);
+        if (choix == 'o'){
+            char fichier[30];
+            printf("Rentrer un nom de fichier(.dep)");
+            scanf("%s",fichier);
+            enregistrerPartie(opti, fichier, compteurOpti);
+        }
+        printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.\n",deplacement,partie,nbLettre);
     }
     else{
         printf("La suite de déplacements %s N’EST PAS une solution pour la partie %s.\n", deplacement,partie);
@@ -72,7 +77,7 @@ int main(){
     return EXIT_SUCCESS;
 }
 
-void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement){
+void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement, bool *inutile){
     int bougeEnLigne = 0, bougeEnColonne = 0;
     if (touche == 'g' || touche == 'G') {
         bougeEnColonne = -1;
@@ -138,17 +143,27 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
     }
     else{
         *inutile = true;
-        return;
     }
 }
 
-void pasJouee(char dep[],char opti[], ,bool *inutile, int * compteurOpti, int i){
-    if (*inutile==flase){
-        opti[*compteurOpti]=dep[];
+void pasJouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteurOpti, int i){
+    if (*inutile==false){
+        opti[*compteurOpti] = dep[i];
+        (*compteurOpti)++;
+    }
+    else{
         *inutile = false;
-        *compteurOpti++;
     }
     
+}
+
+void enregistrerPartie(typeDeplacements opti, char fichier[], int compteurOpti){
+    FILE * f;
+    f = fopen(fichier, "w");
+    for (int i=0; i < compteurOpti; i++){
+        fwrite(&opti[i], sizeof(char), 1, f);
+    }
+    fclose(f);
 }
 
 bool gagne(typePlateau plateau){
@@ -198,15 +213,6 @@ void afficherPlateau(typePlateau plateau){
     }
 }
 
-void pasJouee(char dep[], int i, bool inutile, int * compteur){
-    if(inutile==true){
-        dep[i]="";
-    }
-    else{
-        (*compteur++);
-    }
-}
-
 void chargerPartie(typePlateau plateau, char fichier[]){
     FILE * f;
     char finDeLigne;
@@ -250,15 +256,7 @@ int kbhit(){
     } 
     return unCaractere;
 }
-
-void enregistrerPartie(typeDeplacements opti, char fichier[], int compteurOpti){
-    FILE * f;
-    f = fopen(fichier, "w");
-    for (int ligne =0; ligne < NBDEP; ligne++){
-        fwrite(&opti[ligne], sizeof(char), 1, f);
-    }
-    fclose(f);
-}
+    
 
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb){
     FILE * f;
