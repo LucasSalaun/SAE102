@@ -14,14 +14,17 @@ typedef char typeDeplacements[NBDEP];
 
 int kbhit();
 void chargerPartie(typePlateau plateau, char fichier[]);
-void enregistrerPartie(typeDeplacements opti, char fichier[], int compteurOpti);
+void enregistrerPartie(typeDeplacements opti, char fichier[]
+    , int compteurOpti);
 void afficherPlateau(typePlateau plateau);
 void afficherEntete(char partie[20], int nbDeplacement);
-void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement, bool *inutile);
+void deplacer(typePlateau plateau, char touche, int ligneSokoban,
+     int colonneSokoban, int *nbDeplacement, bool *inutile);
 bool gagne(typePlateau plateau);
 void trouverSokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
-void pasJouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteurOpti, int i);
+void pasJouee(typeDeplacements dep, typeDeplacements opti, bool *inutile,
+     int * compteurOpti, int i);
 
 
 
