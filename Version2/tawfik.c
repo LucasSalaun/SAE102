@@ -59,20 +59,21 @@ int main(){
     }
         gagner=gagne(plateau);
     if (gagner == true){
-<<<<<<< HEAD
-        printf("La suite de déplacements %s est bien une solution pour la partie %s.\nElle contient initialement %d caractères.\n",deplacement,partie,nbLettre);
-        printf("Après optimisation elle contient %d caractères. Souhaitez-vous l’enregistrer (o/n) ?" ,compteurOpti);
-        char choix;
-        scanf(" %c", &choix);
-        if (choix == 'o'){
-            char fichier[30];
-            printf("Rentrer un nom de fichier(.dep)");
-            scanf("%s",fichier);
-            enregistrer_partie(opti, fichier, compteurOpti);
+        if(compteurOpti < nbLettre){
+            printf("La suite de déplacements %s est bien une solution pour la partie %s.\nElle contient initialement %d caractères.\n",deplacement,partie,nbLettre);
+            printf("Après optimisation elle contient %d caractères. Souhaitez-vous l’enregistrer (o/n) ?" ,compteurOpti);
+            char choix;
+            scanf(" %c", &choix);
+            if (choix == 'o'){
+                char fichier[30];
+                printf("Rentrer un nom de fichier(.dep)");
+                scanf("%s",fichier);
+                enregistrer_partie(opti, fichier, compteurOpti);
+            }
         }
-=======
-        printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.\n",deplacement,partie,nbLettre);
->>>>>>> 391d2d2 (	new file:   Version2/sokoban_v2.c)
+        else{
+            printf("La suite de déplacements %s est bien une solution pour la partie %s. Elle contient %d déplacements.\n",deplacement,partie,nbLettre);
+        }
     }
     else{
         printf("La suite de déplacements %s N’EST PAS une solution pour la partie %s.\n", deplacement,partie);
