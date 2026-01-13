@@ -1,4 +1,4 @@
-#include<stdlib.h> //utiliser les coordonnées
+#include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
 #include<stdbool.h>
@@ -14,14 +14,14 @@ typedef char typeDeplacements[NBDEP];
 
 int kbhit();
 void chargerPartie(typePlateau plateau, char fichier[]);
-void enregistrer_partie(typeDeplacements opti, char fichier[], int compteurOpti);
-void afficher_plateau(typePlateau plateau);
-void afficher_entete(char partie[20], int nbDeplacement);
+void enregistrerPartie(typeDeplacements opti, char fichier[], int compteurOpti);
+void afficherPlateau(typePlateau plateau);
+void afficherEntete(char partie[20], int nbDeplacement);
 void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement, bool *inutile);
 bool gagne(typePlateau plateau);
-void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne);
+void trouverSokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
-void pas_jouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteurOpti, int i);
+void pasJouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteurOpti, int i);
 
 
 
@@ -39,22 +39,22 @@ int main(){
     scanf("%s", deplacement);
     chargerPartie(plateau, partie);
     chargerDeplacements(dep,deplacement,&nbLettre);
-    afficher_entete(partie, nbDeplacement);
-    afficher_plateau(plateau);
+    afficherEntete(partie, nbDeplacement);
+    afficherPlateau(plateau);
     char touche = '\0';
     bool gagner = false;
     int i =0;
     int ligne = 0, colonne = 0;
     int compteurOpti = 0;
-    trouver_sokoban(plateau, &ligne, &colonne);
+    trouverSokoban(plateau, &ligne, &colonne);
     while ( nbLettre != i){
         usleep(20000);
         touche = dep[i];        
-        trouver_sokoban(plateau, &ligne, &colonne);
+        trouverSokoban(plateau, &ligne, &colonne);
         deplacer(plateau, touche, ligne, colonne, &nbDeplacement, &inutile);
-        pas_jouee(dep, opti, &inutile, &compteurOpti , i);
-        afficher_entete(partie, nbDeplacement);
-        afficher_plateau(plateau);
+        pasJouee(dep, opti, &inutile, &compteurOpti , i);
+        afficherEntete(partie, nbDeplacement);
+        afficherPlateau(plateau);
         i++;
     }
         gagner=gagne(plateau);
@@ -68,7 +68,7 @@ int main(){
                 char fichier[30];
                 printf("Rentrer un nom de fichier(.dep)");
                 scanf("%s",fichier);
-                enregistrer_partie(opti, fichier, compteurOpti);
+                enregistrerPartie(opti, fichier, compteurOpti);
             }
         }
         else{
@@ -150,7 +150,7 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
     }
 }
 
-void pas_jouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteurOpti, int i){
+void pasJouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteurOpti, int i){
     if (*inutile==false){
         opti[*compteurOpti] = dep[i];
         (*compteurOpti)++;
@@ -161,7 +161,7 @@ void pas_jouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int *
     
 }
 
-void enregistrer_partie(typeDeplacements opti, char fichier[], int compteurOpti){
+void enregistrerPartie(typeDeplacements opti, char fichier[], int compteurOpti){
     FILE * f;
     f = fopen(fichier, "w");
     for (int i=0; i < compteurOpti; i++){
@@ -185,7 +185,7 @@ bool gagne(typePlateau plateau){
 }
 
 
-void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne){
+void trouverSokoban(typePlateau plateau, int *ligne, int *colonne){
     for (int i = 0; i < TAILLE; i++){
         for (int j = 0; j < TAILLE; j++){
             if (plateau[i][j] == '@' || plateau[i][j] == '+'){
@@ -197,7 +197,7 @@ void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne){
     }
 }
 
-void afficher_entete(char partie[20], int nbDeplacement){
+void afficherEntete(char partie[20], int nbDeplacement){
     system("clear");
     printf("-------------------------------------------------------\n");
     printf("Partie : %s \n", partie);
@@ -205,7 +205,7 @@ void afficher_entete(char partie[20], int nbDeplacement){
     printf("-------------------------------------------------------\n");
 }
 
-void afficher_plateau(typePlateau plateau){
+void afficherPlateau(typePlateau plateau){
     for (int i = 0; i < TAILLE; i++){
         for (int j = 0; j < TAILLE; j++){
             char c = plateau[i][j];
