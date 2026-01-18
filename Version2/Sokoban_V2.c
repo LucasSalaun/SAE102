@@ -1,4 +1,4 @@
-#include<stdlib.h> //utiliser les coordonnées
+#include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
 #include<stdbool.h>
@@ -12,18 +12,26 @@
 typedef char typePlateau[TAILLE][TAILLE];
 typedef char typeDeplacements[NBDEP];
 
+typedef struct {
+    int ligne;
+    int colonne;
+    typePlateau plateau;
+} typeEtat;
+
+typedef typeEtat typeHistorique[NBDEP];
+
 int kbhit();
 void chargerPartie(typePlateau plateau, char fichier[]);
-void enregistrer_partie(typeDeplacements opti, char fichier[], int compteurOpti);
-void afficher_plateau(typePlateau plateau);
-void afficher_entete(char partie[20], int nbDeplacement);
-void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement, bool *inutile);
+void enregistrerPartie(typeDeplacements opti, char fichier[], int compteurOpti);
+void afficherPlateau(typePlateau plateau);
+void afficherEntete(char partie[20], int nbDeplacement);
+void deplacer(typePlateau plateau, char touche, int ligneSokoban,
+     int colonneSokoban, int *nbDeplacement, bool *inutile);
 bool gagne(typePlateau plateau);
-void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne);
+void trouverSokoban(typePlateau plateau, int *ligne, int *colonne);
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
-void pas_jouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteurOpti, int i);
-
-
+void copierPlateau(typePlateau source, typePlateau destination);
+bool plateauxIdentiques(typePlateau p1, typePlateau p2);
 
 int main(){
     char partie[20];
@@ -31,77 +39,143 @@ int main(){
     typePlateau plateau;
     typeDeplacements dep;
     typeDeplacements opti;
+    typeHistorique historique;
     int nbDeplacement = 0, nbLettre = 0;
     bool inutile = false;
+    
     printf("Entrez le nom du niveau (.sok) : ");
     scanf("%s", partie);
     printf("Entrez le nom du fichier de deplacement (.dep) : ");
     scanf("%s", deplacement);
+    
     chargerPartie(plateau, partie);
-    chargerDeplacements(dep,deplacement,&nbLettre);
-    afficher_entete(partie, nbDeplacement);
-    afficher_plateau(plateau);
+    chargerDeplacements(dep, deplacement, &nbLettre);
+    afficherEntete(partie, nbDeplacement);
+    afficherPlateau(plateau);
+    
     char touche = '\0';
     bool gagner = false;
-    int i =0;
+    int i = 0;
     int ligne = 0, colonne = 0;
     int compteurOpti = 0;
-    trouver_sokoban(plateau, &ligne, &colonne);
-    while ( nbLettre != i){
+    int compteurHistorique = 0;
+    
+    trouverSokoban(plateau, &ligne, &colonne);
+    historique[compteurHistorique].ligne = ligne;
+    historique[compteurHistorique].colonne = colonne;
+    copierPlateau(plateau, historique[compteurHistorique].plateau);
+    compteurHistorique++;
+    
+    while (nbLettre != i){
         usleep(20000);
-        touche = dep[i];        
-        trouver_sokoban(plateau, &ligne, &colonne);
+        touche = dep[i];
+        trouverSokoban(plateau, &ligne, &colonne);
         deplacer(plateau, touche, ligne, colonne, &nbDeplacement, &inutile);
-        pas_jouee(dep, opti, &inutile, &compteurOpti , i);
-        afficher_entete(partie, nbDeplacement);
-        afficher_plateau(plateau);
+        
+        if (!inutile){
+            trouverSokoban(plateau, &ligne, &colonne);
+            
+            bool sequenceInutile = false;
+            int positionRetour = -1;
+            
+            for (int j = 0; j < compteurHistorique; j++){
+                if (historique[j].ligne == ligne && 
+                    historique[j].colonne == colonne &&
+                    plateauxIdentiques(historique[j].plateau, plateau)){
+                    sequenceInutile = true;
+                    positionRetour = j;
+                    break;
+                }
+            }
+            
+            if (sequenceInutile){
+                compteurOpti = positionRetour;
+                compteurHistorique = positionRetour + 1;
+            } else {
+                opti[compteurOpti] = dep[i];
+                compteurOpti++;
+                
+                historique[compteurHistorique].ligne = ligne;
+                historique[compteurHistorique].colonne = colonne;
+                copierPlateau(plateau, historique[compteurHistorique].plateau);
+                compteurHistorique++;
+            }
+        } else {
+            inutile = false;
+        }
+        
+        afficherEntete(partie, nbDeplacement);
+        afficherPlateau(plateau);
         i++;
     }
-        gagner=gagne(plateau);
+    
+    gagner = gagne(plateau);
     if (gagner == true){
-        printf("La suite de déplacements %s est bien une solution pour la partie %s.\nElle contient initialement %d caractères.\n",deplacement,partie,nbLettre);
-        printf("Après optimisation elle contient %d caractères. Souhaitez-vous l’enregistrer (o/n) ?" ,compteurOpti);
+        printf("La suite de déplacements %s est bien une solution pour la partie %s.\nElle contient initialement %d caractères.\n", deplacement, partie, nbLettre);
+        printf("Après optimisation elle contient %d caractères. Souhaitez-vous l'enregistrer (o/n) ? ", compteurOpti);
         char choix;
         scanf(" %c", &choix);
         if (choix == 'o'){
             char fichier[30];
-            printf("Rentrer un nom de fichier(.dep)");
-            scanf("%s",fichier);
-            enregistrer_partie(opti, fichier, compteurOpti);
+            printf("Rentrer un nom de fichier(.dep) : ");
+            scanf("%s", fichier);
+            enregistrerPartie(opti, fichier, compteurOpti);
         }
-    }
-    else{
-        printf("La suite de déplacements %s N’EST PAS une solution pour la partie %s.\n", deplacement,partie);
+    } else {
+        printf("La suite de déplacements %s N'EST PAS une solution pour la partie %s.\n", deplacement, partie);
     }
     return EXIT_SUCCESS;
+}
+
+void copierPlateau(typePlateau source, typePlateau destination){
+    for (int i = 0; i < TAILLE; i++){
+        for (int j = 0; j < TAILLE; j++){
+            destination[i][j] = source[i][j];
+        }
+    }
+}
+
+bool plateauxIdentiques(typePlateau p1, typePlateau p2){
+    for (int i = 0; i < TAILLE; i++){
+        for (int j = 0; j < TAILLE; j++){
+            if (p1[i][j] != p2[i][j]){
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSokoban, int *nbDeplacement, bool *inutile){
     int bougeEnLigne = 0, bougeEnColonne = 0;
     if (touche == 'g' || touche == 'G') {
         bougeEnColonne = -1;
-    }else if (touche == 'd' || touche == 'D'){
+    } else if (touche == 'd' || touche == 'D'){
         bougeEnColonne = 1;
-    }else if (touche == 'h' || touche == 'H'){
+    } else if (touche == 'h' || touche == 'H'){
         bougeEnLigne = -1;
-    }else if (touche == 'b' || touche == 'B') {
-    bougeEnLigne = 1;
-    }else{
-        return; //retourne rien si une mauvaise touche est appuyé
+    } else if (touche == 'b' || touche == 'B') {
+        bougeEnLigne = 1;
+    } else {
+        return;
     }
+    
     int maj = -1;
     if (touche == 'B' || touche == 'H' || touche == 'G' || touche == 'D'){
         maj = 1;
     }
+    
     int nouvelleLigne = ligneSokoban + bougeEnLigne;
     int nouvelleColonne = colonneSokoban + bougeEnColonne;
-    char destination = plateau[nouvelleLigne][nouvelleColonne]; //la case où on souhaite aller
-    char positionActuelle = plateau[ligneSokoban][colonneSokoban]; //la case où on est
+    char destination = plateau[nouvelleLigne][nouvelleColonne];
+    char positionActuelle = plateau[ligneSokoban][colonneSokoban];
+    
     if (destination == '#'){
         *inutile = true;
         return;
     }
-    if ((destination == ' ' && maj != 1) || (destination == '.'  && maj != 1)){
+    
+    if ((destination == ' ' && maj != 1) || (destination == '.' && maj != 1)){
         if (positionActuelle == '@'){
             plateau[ligneSokoban][colonneSokoban] = ' ';
         } else {
@@ -114,11 +188,11 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
             plateau[nouvelleLigne][nouvelleColonne] = '+';
         }
         (*nbDeplacement)++;
-    }
-    else if ((destination == '$'  && maj == 1) || (destination == '*'  && maj == 1)){
+    } else if ((destination == '$' && maj == 1) || (destination == '*' && maj == 1)){
         int ligneApres = nouvelleLigne + bougeEnLigne;
         int colonneApres = nouvelleColonne + bougeEnColonne;
         char caseApres = plateau[ligneApres][colonneApres];
+        
         if (caseApres == ' ' || caseApres == '.'){
             if (caseApres == ' '){
                 plateau[ligneApres][colonneApres] = '$';
@@ -138,49 +212,38 @@ void deplacer(typePlateau plateau, char touche, int ligneSokoban, int colonneSok
                 plateau[ligneSokoban][colonneSokoban] = '.';
             }
             (*nbDeplacement)++;
+        } else {
+            *inutile = true;
         }
-    }
-    else{
+    } else {
         *inutile = true;
     }
 }
 
-void pas_jouee(typeDeplacements dep, typeDeplacements opti, bool *inutile, int * compteurOpti, int i){
-    if (*inutile==false){
-        opti[*compteurOpti] = dep[i];
-        (*compteurOpti)++;
-    }
-    else{
-        *inutile = false;
-    }
-    
-}
-
-void enregistrer_partie(typeDeplacements opti, char fichier[], int compteurOpti){
+void enregistrerPartie(typeDeplacements opti, char fichier[], int compteurOpti){
     FILE * f;
     f = fopen(fichier, "w");
-    for (int i=0; i < compteurOpti; i++){
+    for (int i = 0; i < compteurOpti; i++){
         fwrite(&opti[i], sizeof(char), 1, f);
     }
     fclose(f);
 }
 
 bool gagne(typePlateau plateau){
-    for (int i = 0; i < TAILLE; i++)
-    {
-        for (int j = 0; j < TAILLE; j++)
-        {
-            if (plateau[i][j] == '.')
+    for (int i = 0; i < TAILLE; i++){
+        for (int j = 0; j < TAILLE; j++){
+            if (plateau[i][j] == '.'){
                 return false;
-            if (plateau[i][j] == '+')
+            }
+            if (plateau[i][j] == '+'){
                 return false;
+            }
         }
     }
     return true;
 }
 
-
-void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne){
+void trouverSokoban(typePlateau plateau, int *ligne, int *colonne){
     for (int i = 0; i < TAILLE; i++){
         for (int j = 0; j < TAILLE; j++){
             if (plateau[i][j] == '@' || plateau[i][j] == '+'){
@@ -192,7 +255,7 @@ void trouver_sokoban(typePlateau plateau, int *ligne, int *colonne){
     }
 }
 
-void afficher_entete(char partie[20], int nbDeplacement){
+void afficherEntete(char partie[20], int nbDeplacement){
     system("clear");
     printf("-------------------------------------------------------\n");
     printf("Partie : %s \n", partie);
@@ -200,11 +263,11 @@ void afficher_entete(char partie[20], int nbDeplacement){
     printf("-------------------------------------------------------\n");
 }
 
-void afficher_plateau(typePlateau plateau){
+void afficherPlateau(typePlateau plateau){
     for (int i = 0; i < TAILLE; i++){
         for (int j = 0; j < TAILLE; j++){
             char c = plateau[i][j];
-            if (c == '*') c = '$'; //on ne doit pas à l'affichage différencier les caisses des caisses sur objectif etc...
+            if (c == '*') c = '$';
             if (c == '+') c = '@';
             printf("%c", c);
         }
@@ -217,12 +280,12 @@ void chargerPartie(typePlateau plateau, char fichier[]){
     char finDeLigne;
 
     f = fopen(fichier, "r");
-    if (f==NULL){
+    if (f == NULL){
         printf("ERREUR SUR FICHIER");
         exit(EXIT_FAILURE);
     } else {
-        for (int ligne=0 ; ligne<TAILLE ; ligne++){
-            for (int colonne=0 ; colonne<TAILLE ; colonne++){
+        for (int ligne = 0; ligne < TAILLE; ligne++){
+            for (int colonne = 0; colonne < TAILLE; colonne++){
                 fread(&plateau[ligne][colonne], sizeof(char), 1, f);
             }
             fread(&finDeLigne, sizeof(char), 1, f);
@@ -255,7 +318,6 @@ int kbhit(){
     } 
     return unCaractere;
 }
-    
 
 void chargerDeplacements(typeDeplacements t, char fichier[], int * nb){
     FILE * f;
@@ -263,7 +325,7 @@ void chargerDeplacements(typeDeplacements t, char fichier[], int * nb){
     *nb = 0;
 
     f = fopen(fichier, "r");
-    if (f==NULL){
+    if (f == NULL){
         printf("FICHIER NON TROUVE\n");
     } else {
         fread(&dep, sizeof(char), 1, f);
